@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LABBOR · Design Code</title>
+<link rel="stylesheet" href="deck.css"/>
+</head>
+<body>
+<deck-stage width="1920" height="1080">
+
+  <!-- 1 · Cover -->
+  <section data-label="Cover">
+    <div class="slide cover" data-screen-label="Cover">
+      <div class="logo-lock">
+        <div class="ic"><span style="height:34px"></span><span style="height:24px"></span><span style="height:30px"></span></div>
+        <div class="wd">STUDIO</div>
+      </div>
+      <div class="eyebrow">Design Code · v0.1</div>
+      <h1 class="title">Зуботехническая<br/>STUDIO</h1>
+      <div class="meta">
+        <div class="d"><span>Продукт</span><b>SaaS CMS для лабораторий</b></div>
+        <div class="d"><span>Тема</span><b>Dark-first · Lime · Montserrat</b></div>
+        <div class="d"><span>Стек</span><b>React · TS · Tailwind · reactbits</b></div>
+      </div>
+      <div class="kick">LABBOR / DESIGN SYSTEM</div>
+    </div>
+  </section>
+
+  <!-- 2 · Principles -->
+  <section data-label="Принципы">
+    <div class="slide" data-screen-label="Принципы">
+      <div class="head"><div class="eyebrow">01 · Основа</div><h2 class="title">Принципы</h2></div>
+      <div class="principles">
+        <div class="pr"><div class="num">01</div><div><h3>Тёмная среда</h3><p>Чистый чёрный холст, на нём — слои почти-чёрных поверхностей. Контент и статусы светятся на фоне, интерфейс не отвлекает.</p></div></div>
+        <div class="pr"><div class="num">02</div><div><h3>Один акцент</h3><p>Лаймовый <span class="mono" style="color:var(--lime)">#bdff67</span> — единственный акцент: действия, выбор, фокус, успех. Используется экономно.</p></div></div>
+        <div class="pr"><div class="num">03</div><div><h3>Крупно и просторно</h3><p>Большая типографика Montserrat, щедрые отступы, скруглённые формы, hit-таргеты ≥ 44px. Плотность — комфортная.</p></div></div>
+        <div class="pr"><div class="num">04</div><div><h3>Без украшательств</h3><p>Никаких градиентов, эмодзи и теней — кроме всплывающих слоёв. Бренд-красный живёт только в логотипе.</p></div></div>
+      </div>
+      <div class="slide-no mono">02</div>
+    </div>
+  </section>
+
+  <!-- 3 · Color: surfaces -->
+  <section data-label="Цвет · Поверхности">
+    <div class="slide" data-screen-label="Цвет · Поверхности">
+      <div class="head"><div class="eyebrow">02 · Цвет</div><h2 class="title">Холст и поверхности</h2></div>
+      <div class="ramp">
+        <div class="step" style="background:#000"><div class="n">bg</div><div class="h">#000000</div></div>
+        <div class="step" style="background:#141414"><div class="n">surface-1</div><div class="h">#141414</div></div>
+        <div class="step" style="background:#171717"><div class="n">surface-2</div><div class="h">#171717</div></div>
+        <div class="step" style="background:#1c1c1c"><div class="n">surface-3</div><div class="h">#1c1c1c</div></div>
+        <div class="step" style="background:#212121"><div class="n">surface-4</div><div class="h">#212121</div></div>
+        <div class="step" style="background:#292929"><div class="n">surface-5</div><div class="h">#292929</div></div>
+        <div class="step" style="background:#333"><div class="n">surface-6</div><div class="h">#333333</div></div>
+      </div>
+      <div class="cols" style="margin-top:54px;flex:0 0 auto;">
+        <div>
+          <div class="col-label">Текст</div>
+          <div class="swatch-row">
+            <div class="swatch"><div class="chip" style="background:#fff"></div><div class="meta"><div class="nm">fg</div><div class="hx">#FFFFFF</div></div></div>
+            <div class="swatch"><div class="chip" style="background:#c5c5c5"></div><div class="meta"><div class="nm">secondary</div><div class="hx">#C5C5C5</div></div></div>
+            <div class="swatch"><div class="chip" style="background:#7e7e7e"></div><div class="meta"><div class="nm">muted</div><div class="hx">#7E7E7E</div></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="col-label">Акцент и бренд</div>
+          <div class="swatch-row">
+            <div class="swatch"><div class="chip" style="background:#bdff67"></div><div class="meta"><div class="nm">accent</div><div class="hx">#BDFF67</div></div></div>
+            <div class="swatch"><div class="chip" style="background:#28391a"></div><div class="meta"><div class="nm">accent-soft</div><div class="hx">#28391A</div></div></div>
+            <div class="swatch"><div class="chip" style="background:#d22934"></div><div class="meta"><div class="nm">brand-red</div><div class="hx">#D22934</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-no mono">03</div>
+    </div>
+  </section>
+
+  <!-- 4 · Status system -->
+  <section data-label="Статусы">
+    <div class="slide" data-screen-label="Статусы">
+      <div class="head"><div class="eyebrow">02 · Цвет</div><h2 class="title">Система статусов</h2><div class="sub">Шесть пар bg/fg для жизненного цикла наряда.</div></div>
+      <div class="badges">
+        <span class="badge b-done"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5 10 17 19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Завершено</span>
+        <span class="badge b-work"><span class="dot"></span>В работе</span>
+        <span class="badge b-wait"><span class="dot"></span>Ожидает</span>
+        <span class="badge b-dead"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4 2.5 20h19z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v4.5M12 17.4v.1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>Дедлайн</span>
+        <span class="badge b-lab"><span class="dot"></span>В лабе</span>
+        <span class="badge b-clinic"><span class="dot"></span>В клинике</span>
+      </div>
+      <div class="status-tbl">
+        <div class="r"><b style="color:var(--done-tx)">done</b><span>#33491F / #BDFF67</span></div>
+        <div class="r"><b style="color:var(--work-tx)">work</b><span>#4A3D12 / #F4CF57</span></div>
+        <div class="r"><b style="color:var(--wait-tx)">wait</b><span>#2F2F2F / #B9B9B9</span></div>
+        <div class="r"><b style="color:var(--dead-tx)">dead</b><span>#4A3434 / #FF9699</span></div>
+        <div class="r"><b style="color:var(--lab-tx)">lab</b><span>#33336E / #AEB0FF</span></div>
+        <div class="r"><b style="color:var(--clinic-tx)">clinic</b><span>#1D4A63 / #79C7F0</span></div>
+      </div>
+      <div class="slide-no mono">04</div>
+    </div>
+  </section>
+
+  <!-- 5 · Typography -->
+  <section data-label="Типографика">
+    <div class="slide" data-screen-label="Типографика">
+      <div class="head"><div class="eyebrow">03 · Текст</div><h2 class="title">Типографика</h2><div class="sub">Montserrat · 400 / 500 / 600 / 700</div></div>
+      <div class="type-list">
+        <div class="type-row"><span class="tok">stat</span><span class="px">64px</span><span class="sample" style="font-size:64px;font-weight:600">23 наряда</span></div>
+        <div class="type-row"><span class="tok">4xl</span><span class="px">40px</span><span class="sample" style="font-size:40px;font-weight:600">Наряды</span></div>
+        <div class="type-row"><span class="tok">3xl</span><span class="px">34px</span><span class="sample" style="font-size:34px;font-weight:600">Просмотр наряда №263447</span></div>
+        <div class="type-row"><span class="tok">2xl</span><span class="px">28px</span><span class="sample" style="font-size:28px;font-weight:600">Замена техника</span></div>
+        <div class="type-row"><span class="tok">xl</span><span class="px">23px</span><span class="sample" style="font-size:23px;font-weight:600">Ацеталовый бюгельный протез</span></div>
+        <div class="type-row"><span class="tok">lg</span><span class="px">21px</span><span class="sample" style="font-size:21px;font-weight:500">Тамарова Ольга Александровна</span></div>
+        <div class="type-row"><span class="tok">base</span><span class="px">18px</span><span class="sample" style="font-size:18px;font-weight:400">Имеются особенности строения челюсти</span></div>
+        <div class="type-row"><span class="tok">caption</span><span class="px">15px</span><span class="sample" style="font-size:15px;font-weight:500;color:var(--t4)">ВРАЧ · ПАЦИЕНТ · ТЕХНИК</span></div>
+      </div>
+      <div class="slide-no mono">05</div>
+    </div>
+  </section>
+
+  <!-- 6 · Radius & spacing -->
+  <section data-label="Форма · Радиусы">
+    <div class="slide" data-screen-label="Форма · Радиусы">
+      <div class="head"><div class="eyebrow">04 · Форма</div><h2 class="title">Радиусы и сетка</h2></div>
+      <div class="col-label">Радиусы</div>
+      <div class="tok-grid" style="margin-bottom:48px">
+        <div class="tok-card"><div class="demo"><div class="r-demo" style="border-radius:15px"></div></div><div class="nm">field</div><div class="vl">15px</div></div>
+        <div class="tok-card"><div class="demo"><div class="r-demo" style="border-radius:14px"></div></div><div class="nm">image</div><div class="vl">14px</div></div>
+        <div class="tok-card"><div class="demo"><div class="r-demo" style="border-radius:26px"></div></div><div class="nm">card</div><div class="vl">26px</div></div>
+        <div class="tok-card"><div class="demo"><div class="r-demo" style="border-radius:26px"></div></div><div class="nm">modal</div><div class="vl">26px</div></div>
+        <div class="tok-card"><div class="demo"><div class="r-demo" style="border-radius:30px"></div></div><div class="nm">panel</div><div class="vl">30px</div></div>
+        <div class="tok-card"><div class="demo"><div class="r-demo" style="border-radius:999px"></div></div><div class="nm">pill</div><div class="vl">999px</div></div>
+      </div>
+      <div class="col-label">Шкала отступов</div>
+      <div class="tok-grid">
+        <div class="tok-card"><div class="demo" style="height:auto;align-items:flex-end"><div class="sp-demo" style="width:6px"></div></div><div class="nm">1</div><div class="vl">6px</div></div>
+        <div class="tok-card"><div class="demo" style="height:auto;align-items:flex-end"><div class="sp-demo" style="width:10px"></div></div><div class="nm">2</div><div class="vl">10px</div></div>
+        <div class="tok-card"><div class="demo" style="height:auto;align-items:flex-end"><div class="sp-demo" style="width:14px"></div></div><div class="nm">3</div><div class="vl">14px</div></div>
+        <div class="tok-card"><div class="demo" style="height:auto;align-items:flex-end"><div class="sp-demo" style="width:18px"></div></div><div class="nm">4</div><div class="vl">18px</div></div>
+        <div class="tok-card"><div class="demo" style="height:auto;align-items:flex-end"><div class="sp-demo" style="width:26px"></div></div><div class="nm">6</div><div class="vl">26px</div></div>
+        <div class="tok-card"><div class="demo" style="height:auto;align-items:flex-end"><div class="sp-demo" style="width:46px"></div></div><div class="nm">8</div><div class="vl">46px</div></div>
+      </div>
+      <div class="slide-no mono">06</div>
+    </div>
+  </section>
+
+  <!-- 7 · Components inventory -->
+  <section data-label="Компоненты">
+    <div class="slide" data-screen-label="Компоненты">
+      <div class="head"><div class="eyebrow">05 · Библиотека</div><h2 class="title">Инвентарь компонентов</h2><div class="sub">⚑ — доменные (зуботехника). Остальное — generic под Tailwind + reactbits.</div></div>
+      <div class="inv">
+        <div class="inv-group">
+          <div class="gh">Оболочка и навигация</div>
+          <ul>
+            <li><span class="mono">AppShell</span></li>
+            <li><span class="mono">NavRail</span></li>
+            <li><span class="mono">TopBar</span></li>
+            <li><span class="mono">Logo</span></li>
+            <li><span class="mono">SearchBar</span></li>
+            <li><span class="mono">DatePill</span></li>
+            <li><span class="mono">NotificationBell</span></li>
+            <li><span class="mono">ProfileChip</span></li>
+          </ul>
+        </div>
+        <div class="inv-group">
+          <div class="gh">Отображение данных</div>
+          <ul>
+            <li><span class="mono">StatItem</span><span class="tag">CountUp</span></li>
+            <li><span class="mono">OrderCard</span><span class="tag">Spotlight</span></li>
+            <li><span class="mono">Badge</span></li>
+            <li><span class="mono">Avatar</span></li>
+            <li><span class="mono">ToothChart</span><span class="dom">⚑</span></li>
+            <li><span class="mono">StageList</span><span class="dom">⚑</span></li>
+            <li><span class="mono">ReadOnlyField</span></li>
+            <li><span class="mono">TechCard</span><span class="dom">⚑</span></li>
+            <li><span class="mono">ActivityCalendar</span><span class="dom">⚑</span></li>
+          </ul>
+        </div>
+        <div class="inv-group">
+          <div class="gh">Контролы</div>
+          <ul>
+            <li><span class="mono">Button</span></li>
+            <li><span class="mono">IconButton</span></li>
+            <li><span class="mono">Toggle</span></li>
+            <li><span class="mono">Select</span></li>
+            <li><span class="mono">AmountInput</span></li>
+            <li><span class="mono">TextField</span></li>
+            <li><span class="mono">HelpHint</span></li>
+          </ul>
+          <div class="gh" style="margin-top:30px">Обратная связь</div>
+          <ul>
+            <li><span class="mono">Modal</span></li>
+            <li><span class="mono">Toast</span><span class="tag">AnimatedList</span></li>
+            <li><span class="mono">Skeleton</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="slide-no mono">07</div>
+    </div>
+  </section>
+
+  <!-- 8 · Live samples -->
+  <section data-label="Компоненты · вживую">
+    <div class="slide" data-screen-label="Компоненты · вживую">
+      <div class="head"><div class="eyebrow">05 · Библиотека</div><h2 class="title">Компоненты вживую</h2></div>
+      <div class="cols">
+        <div class="sample-wrap">
+          <div class="sample-block">
+            <div class="lbl">Button · IconButton</div>
+            <div class="row">
+              <button class="btn btn-lime">Закрыть наряд</button>
+              <button class="btn btn-ghost">Редактировать</button>
+              <span class="iconbtn lime"><svg viewBox="0 0 24 24" fill="none"><path d="M7 8h11l-3-3M17 16H6l3 3" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="iconbtn"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4 2.5 20h19z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v4.5M12 17.4v.1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></span>
+            </div>
+          </div>
+          <div class="sample-block">
+            <div class="lbl">Badge</div>
+            <div class="row">
+              <span class="badge b-done" style="font-size:22px;padding:12px 22px"><span class="dot" style="width:13px;height:13px"></span>Завершено</span>
+              <span class="badge b-work" style="font-size:22px;padding:12px 22px"><span class="dot" style="width:13px;height:13px"></span>В работе</span>
+              <span class="badge b-dead" style="font-size:22px;padding:12px 22px"><span class="dot" style="width:13px;height:13px"></span>Дедлайн</span>
+            </div>
+          </div>
+          <div class="sample-block">
+            <div class="lbl">Toggle</div>
+            <div class="row" style="justify-content:space-between"><span class="v" style="font-size:26px">Высокий приоритет</span><span class="toggle"><span class="k"></span></span></div>
+          </div>
+        </div>
+        <div class="sample-wrap">
+          <div class="sample-block">
+            <div class="lbl">StatItem</div>
+            <div class="statbox"><span class="n">23</span><span class="l">в работе</span><span class="d">+13</span></div>
+          </div>
+          <div class="sample-block">
+            <div class="lbl">ReadOnlyField</div>
+            <div class="field"><div><div class="k">ПАЦИЕНТ</div><div class="v">Тамарова Ольга</div></div><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="currentColor" stroke-width="1.8"/></svg></div>
+          </div>
+          <div class="sample-block">
+            <div class="lbl">OrderCard</div>
+            <div style="background:var(--s5);border-radius:26px;padding:28px 30px">
+              <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:18px"><span style="font-size:25px;font-weight:600;max-width:60%">Ацеталовый бюгельный протез</span><span class="badge b-work" style="font-size:20px;padding:10px 18px"><span class="dot" style="width:12px;height:12px"></span>В работе</span></div>
+              <div class="row" style="gap:50px;color:var(--t4);font-size:18px"><span>Наряд&nbsp;<b style="color:var(--t2)">№263447</b></span><span style="color:var(--dead-tx)">Срочно</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-no mono">08</div>
+    </div>
+  </section>
+
+  <!-- 9 · Stack mapping -->
+  <section data-label="Стек">
+    <div class="slide" data-screen-label="Стек">
+      <div class="head"><div class="eyebrow">06 · Интеграция</div><h2 class="title">Привязка к стеку</h2></div>
+      <div class="stack">
+        <div class="stack-card">
+          <div class="logo" style="background:#0c2535;color:#38bdf8;font-weight:700">tw</div>
+          <h3>Tailwind</h3>
+          <p>Токены экспортированы как CSS-переменные и tailwind-тема. Цвета, типошкала, радиусы, отступы — utility-классами.</p>
+          <span class="pill">theme.css · v4</span>
+          <span class="pill">tailwind.labbor.js · v3</span>
+        </div>
+        <div class="stack-card">
+          <div class="logo" style="background:var(--lime-soft);color:var(--lime);font-weight:700">⌘</div>
+          <h3>reactbits</h3>
+          <p>Анимация и микровзаимодействия: CountUp для статистики, Spotlight/Tilted для карточек, AnimatedList для тостов и меню.</p>
+          <span class="pill">CountUp · SpotlightCard</span>
+          <span class="pill">AnimatedList</span>
+        </div>
+        <div class="stack-card">
+          <div class="logo" style="background:#1c1c1c;color:#fff;border:1px solid var(--line)">✦</div>
+          <h3>lucide-react</h3>
+          <p>Единый набор линейных иконок 1.8px. Home, LayoutGrid, Wallet, Bell, Lock, Repeat, TriangleAlert, Check, ChevronDown.</p>
+          <span class="pill">stroke 1.8 · 24px</span>
+        </div>
+      </div>
+      <div class="slide-no mono">09</div>
+    </div>
+  </section>
+
+  <!-- 10 · Files / handoff -->
+  <section data-label="Файлы">
+    <div class="slide" data-screen-label="Файлы">
+      <div class="head"><div class="eyebrow">07 · Передача</div><h2 class="title">Что в комплекте</h2><div class="sub">Папка <span class="mono" style="color:var(--lime)">design-system/</span> — источник правды для людей и ИИ-агентов.</div></div>
+      <div class="files">
+        <div class="f"><span class="ic mono">{ }</span><span class="nm">tokens.json</span><span class="ds">Дизайн-токены (W3C-формат)</span></div>
+        <div class="f"><span class="ic mono">::</span><span class="nm">theme.css</span><span class="ds">Tailwind v4 — @theme</span></div>
+        <div class="f"><span class="ic mono">js</span><span class="nm">tailwind.labbor.js</span><span class="ds">Tailwind v3 — theme.extend</span></div>
+        <div class="f"><span class="ic mono">md</span><span class="nm">DESIGN_SYSTEM.md</span><span class="ds">Лёгкая справка для ИИ + инвентарь</span></div>
+        <div class="f"><span class="ic mono">▤</span><span class="nm">deck.html</span><span class="ds">Эта презентация</span></div>
+      </div>
+      <div class="slide-no mono">10</div>
+    </div>
+  </section>
+
+</deck-stage>
+<script src="deck-stage.js"></script>
+</body>
+</html>
