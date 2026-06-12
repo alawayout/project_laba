@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* ============================================================
+   LABBOR Design Code — Tailwind v4 theme (dark-first)
+   Tokens mirror /design-system/tokens.json
+   ============================================================ */
 @theme {
   /* canvas & surfaces */
   --color-bg: #000000;
@@ -24,64 +28,96 @@
   --color-fg-tertiary: #b9b9b9;
   --color-fg-muted: #7e7e7e;
 
-  /* status */
-  --color-done:      #33491f;
-  --color-done-fg:   #bdff67;
-  --color-work:      #4a3d12;
-  --color-work-fg:   #f4cf57;
-  --color-wait:      #2f2f2f;
-  --color-wait-fg:   #b9b9b9;
-  --color-dead:      #4a3434;
-  --color-dead-fg:   #ff9699;
-  --color-lab:       #33336e;
-  --color-lab-fg:    #aeb0ff;
-  --color-clinic:    #1d4a63;
-  --color-clinic-fg: #79c7f0;
+  /* status (bg / fg pairs) */
+  --color-done: #33491f;     --color-done-fg: #bdff67;
+  --color-work: #4a3d12;     --color-work-fg: #f4cf57;
+  --color-wait: #2f2f2f;     --color-wait-fg: #b9b9b9;
+  --color-dead: #4a3434;     --color-dead-fg: #ff9699;
+  --color-lab: #33336e;      --color-lab-fg: #aeb0ff;
+  --color-clinic: #1d4a63;   --color-clinic-fg: #79c7f0;
 
-  /* typography */
-  --font-sans: "Montserrat", system-ui, sans-serif;
-
-  --text-micro:   13px;
+  /* typography (font loaded via next/font → --font-montserrat) */
+  --font-sans: var(--font-montserrat), "Montserrat", system-ui, sans-serif;
+  --text-micro: 13px;
   --text-caption: 15px;
-  --text-sm:      17px;
-  --text-base:    18px;
-  --text-md:      20px;
-  --text-lg:      21px;
-  --text-xl:      23px;
-  --text-2xl:     28px;
-  --text-3xl:     34px;
-  --text-4xl:     40px;
-  --text-stat:    64px;
+  --text-sm: 17px;
+  --text-base: 18px;
+  --text-md: 20px;
+  --text-lg: 21px;
+  --text-xl: 23px;
+  --text-2xl: 28px;
+  --text-3xl: 34px;
+  --text-4xl: 40px;
+  --text-stat: 64px;
 
   /* radius */
   --radius-field: 15px;
   --radius-image: 14px;
-  --radius-card:  26px;
+  --radius-card: 26px;
   --radius-modal: 26px;
   --radius-panel: 30px;
-  --radius-pill:  999px;
+  --radius-pill: 999px;
 
-  /* spacing */
-  --spacing-1: 6px;
-  --spacing-2: 10px;
-  --spacing-3: 14px;
-  --spacing-4: 18px;
-  --spacing-5: 22px;
-  --spacing-6: 26px;
-  --spacing-7: 30px;
-  --spacing-8: 46px;
-
-  /* shadows */
-  --shadow-modal: 0 18px 40px rgba(0,0,0,.5);
-  --shadow-toast: 0 16px 40px rgba(0,0,0,.5);
+  /* shadow */
+  --shadow-modal: 0 18px 40px rgba(0, 0, 0, 0.5);
+  --shadow-toast: 0 16px 40px rgba(0, 0, 0, 0.5);
 
   /* motion */
-  --ease-smooth: cubic-bezier(.2,.8,.2,1);
+  --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-@layer base {
-  html {
-    background-color: var(--color-bg);
-    color: var(--color-fg);
+/* ---- base ---- */
+html, body {
+  height: 100%;
+}
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+::selection {
+  background: var(--color-accent);
+  color: #000;
+}
+
+/* thin dark scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #262626 transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 20px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+/* ---- shared keyframes (reactbits-derived primitives use these) ---- */
+@keyframes labbor-scrim { from { opacity: 0; } to { opacity: 1; } }
+@keyframes labbor-pop {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes labbor-toast-in {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes labbor-toast-out {
+  to { opacity: 0; transform: translateX(40px); }
+}
+@keyframes labbor-view-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
   }
 }
