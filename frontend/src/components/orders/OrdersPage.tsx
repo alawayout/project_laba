@@ -8,7 +8,7 @@ import { useDashboardOrders } from "@/hooks/useDashboardOrders";
 import { useToaster } from "@/hooks/useToaster";
 import { cn } from "@/lib/utils";
 import { DashboardHeader } from "@/components/orders/DashboardHeader";
-import { WorkOrderCard } from "@/components/orders/WorkOrderCard";
+import { WorkOrderCard } from "@/components/orders/WorkOrderCard/WorkOrderCard";
 import {
 	BoardFilter,
 	BoardHeader,
@@ -49,8 +49,9 @@ export default function OrdersPage() {
 				{orders.length ? (
 					<div
 						className={cn(
+							"pt-6 pb-2",
 							view === "row"
-								? "flex gap-5 overflow-x-auto pb-2"
+								? "flex flex-col gap-5 sm:flex-row sm:overflow-x-auto sm:overflow-y-visible"
 								: "grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3",
 						)}
 					>
@@ -60,14 +61,14 @@ export default function OrdersPage() {
 								order={order}
 								className={
 									view === "row"
-										? "w-[340px] shrink-0"
+										? "w-full sm:w-120 sm:shrink-0"
 										: "w-full"
 								}
 							/>
 						))}
 					</div>
 				) : (
-					<div className="flex flex-col items-center gap-3.5 py-[120px] text-fg-muted">
+					<div className="flex flex-col items-center gap-3.5 py-30 text-fg-muted">
 						<SearchX className="size-12" />
 						<p className="text-md">Наряды не найдены</p>
 					</div>

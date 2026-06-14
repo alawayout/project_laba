@@ -27,6 +27,7 @@
   --color-fg-secondary: #c5c5c5;
   --color-fg-tertiary: #b9b9b9;
   --color-fg-muted: #7e7e7e;
+  --color-fg-disabled: #DCDCDC;
 
   /* status (bg / fg pairs) */
   --color-done: #33491f;     --color-done-fg: #bdff67;

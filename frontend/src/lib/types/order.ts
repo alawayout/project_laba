@@ -1,9 +1,6 @@
 import type { ID, OrderStatus } from "./common";
 import type { Technician } from "./staff";
 
-/** Execution status of a single production stage. */
-export type StageStatus = "done" | "work" | "wait";
-
 /** Completed-stage report, shown in the "Отчёт" modal. */
 export interface StageReport {
 	readonly takenAt: string; // "10.09.2025 в 10:00"
@@ -18,7 +15,7 @@ export interface WorkStage {
 	readonly step: string; // "1 этап"
 	readonly name: string; // "Гипсовка"
 	readonly technician: Technician;
-	readonly status: StageStatus;
+	readonly status: OrderStatus;
 	readonly timeline: string | null; // "Завершено 07.09.2025 в 13:44"
 	readonly deadlineNote?: string; // "Нарушен срок сдачи на 2 дня"
 	readonly report?: StageReport;
@@ -58,5 +55,4 @@ export interface OrderDetail {
 	readonly stages: WorkStage[];
 	readonly due: { date: string; time: string }; // { date: "19.09.2025", time: "10:00" }
 	readonly priority: boolean;
-	
 }

@@ -1,4 +1,4 @@
-import { Check, Repeat, TriangleAlert, type LucideIcon } from "lucide-react";
+import { Repeat, TriangleAlert, type LucideIcon } from "lucide-react";
 import type { OrderStatus } from "@/lib/types";
 import { getStatusMeta } from "@/lib/status-meta";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,6 @@ interface BadgeProps {
 }
 
 const LEADING_ICON: Partial<Record<OrderStatus, LucideIcon>> = {
-	done: Check,
 	dead: TriangleAlert,
 	clinic: Repeat,
 };
@@ -33,7 +32,7 @@ export function Badge({
 	size = "md",
 	className,
 	transfer,
-}: BadgeProps) {
+}: Readonly<BadgeProps>) {
 	const meta = getStatusMeta(status);
 	const Icon = transfer ? Repeat : LEADING_ICON[status];
 	return (

@@ -10,7 +10,7 @@ export const orders: OrderSummary[] = [
 		technician: "Дариуш М. В.",
 		dueLabel: "19.09.2025 · 10:00",
 		fittingLabel: "15.09.2025 · 12:30",
-		status: "work",
+		status: "lab",
 		urgent: true,
 	},
 	{
@@ -55,7 +55,7 @@ export const orders: OrderSummary[] = [
 		technician: "Колбин С. А.",
 		dueLabel: "12.09.2025 · 16:00",
 		fittingLabel: "10.09.2025 · 10:00",
-		status: "done",
+		status: "clinic",
 	},
 	{
 		id: "264012",
@@ -66,7 +66,7 @@ export const orders: OrderSummary[] = [
 		technician: "Маркова С. А.",
 		dueLabel: "28.09.2025 · 09:30",
 		fittingLabel: "24.09.2025 · 11:00",
-		status: "work",
+		status: "dead",
 	},
 ];
 
