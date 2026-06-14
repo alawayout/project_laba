@@ -20,13 +20,13 @@ export function OrderCard({ order }: OrderCardProps) {
   return (
     <Link
       href={`/orders/${order.id}`}
-      className="block rounded-card border border-transparent bg-surface-3 p-6 transition hover:-translate-y-1 hover:border-surface-6 hover:bg-surface-4"
+      className="block rounded-card glass-soft p-6 transition hover:-translate-y-1 hover:bg-white/[0.07]"
     >
-      <div className="mb-5 flex items-start justify-between gap-3.5">
-        <h3 className="max-w-[74%] text-xl font-semibold leading-tight text-balance">
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <h3 className="min-w-0 flex-1 text-xl font-semibold leading-tight text-balance">
           {order.workType}
         </h3>
-        <Badge status={order.status} />
+        <Badge status={order.status} className="shrink-0" />
       </div>
 
       <dl className="flex flex-col gap-3">

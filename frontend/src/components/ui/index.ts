@@ -9,3 +9,8 @@ export { AmountInput } from "./AmountInput";
 export { SearchInput } from "./SearchInput";
 export { Modal } from "./Modal";
 export { CountUp } from "./CountUp";
+export { GlassCard, type GlassTone } from "./GlassCard";
+export { SegmentedBar, type BarSegment } from "./SegmentedBar";
+export { LegendRow } from "./LegendRow";
+export { SegmentedTabs, type TabOption } from "./SegmentedTabs";
+export { MiniBarChart, type BarDatum } from "./MiniBarChart";

@@ -15,11 +15,11 @@ export interface NavItem {
   implemented: boolean;
 }
 
-/** Primary navigation. Only "Наряды" is wired in this slice. */
+/** Primary navigation. */
 export const NAV_ITEMS: NavItem[] = [
   { id: "orders", label: "Наряды", icon: LayoutGrid, href: "/", implemented: true },
-  { id: "stats", label: "Аналитика", icon: LineChart, implemented: false },
-  { id: "salary", label: "Зарплаты", icon: Wallet, implemented: false },
-  { id: "works", label: "Виды работ", icon: FileText, implemented: false },
+  { id: "stats", label: "Аналитика", icon: LineChart, href: "/analytics", implemented: true },
+  { id: "salary", label: "Зарплаты", icon: Wallet, href: "/salary", implemented: true },
+  { id: "works", label: "Виды работ", icon: FileText, href: "/work-types", implemented: true },
   { id: "docs", label: "Документы", icon: FolderOpen, implemented: false },
 ];

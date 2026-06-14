@@ -56,5 +56,20 @@ src/
 ## Дизайн-токены
 Источник правды — `/design-system` в корне репозитория (`tokens.json`, `theme.css`, `DESIGN_SYSTEM.md`). В этом проекте токены живут в `@theme` внутри `src/app/globals.css` и доступны как утилиты Tailwind (`bg-surface-3`, `text-fg-muted`, `rounded-card`, `text-stat`, статусы `bg-done text-done-fg` и т.д.).
 
+## Glass-дизайн (актуальная Figma)
+Адаптирован «стеклянный» стиль Apple из новой мобильной Figma:
+- Утилиты `glass` / `glass-soft` / `glass-nav` в `globals.css` (`@utility`): полупрозрачный фон + `backdrop-blur` + hairline-border.
+- Плавающий стеклянный таб-бар на мобильном (`NavRail`), карточки и панели — на `glass-soft`.
+- Палитра графиков (`--color-chart-fixed/orders/fines`) для разбивки доходов и диаграмм.
+- Превью новых экранов: [`preview/glass-screens.html`](./preview/glass-screens.html).
+
+## Разделы
+- `/` — Наряды (дашборд)  · `/orders/[id]` — Просмотр наряда
+- `/analytics` — **Аналитика** (KPI, тренд нарядов, распределение по статусам/видам)
+- `/salary` — **Зарплаты** (доходы периода: Фиксированная/Наряды/Штрафы, график выполненных, таблица техников)
+- `/work-types` — **Виды работ** (каталог: цена, срок, этапы; поиск + фильтр по категориям)
+
+Новые домены повторяют ту же архитектуру: `lib/types/{payroll,analytics,work-type}.ts`, `lib/mocks/{payroll,analytics,work-types}.mock.ts`, `hooks/{usePayroll,useAnalytics,useWorkTypes}.ts`, `components/{salary,analytics,work-types}/`.
+
 ## Что дальше (вне текущего среза)
-Экраны «Аналитика», «Зарплаты» (карточки техников + activity-календарь), «Виды работ»; роли super-admin / lab-admin / tech; реальный API вместо моков (хуки уже изолируют источник данных).
+Роли super-admin / lab-admin / tech; мобильное приложение техника (экраны наряда/отчёта из новой Figma); реальный API вместо моков (хуки уже изолируют источник данных).

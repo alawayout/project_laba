@@ -96,7 +96,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
 
         <OrderInfoPanel order={order} />
 
-        <div className="mb-5 flex flex-col gap-4 rounded-panel bg-surface-3 p-5 md:p-6">
+        <div className="mb-5 flex flex-col gap-4 rounded-panel glass-soft p-5 md:p-6">
           <Field label="Вид работы" value={order.workType} locked />
           <ToothChart
             isSelected={detail.isToothSelected}
