@@ -19,12 +19,15 @@ export function Panel({
 	headerRight,
 	className,
 	children,
-}: PanelProps) {
+}: Readonly<PanelProps>) {
 	return (
 		<section
-			className={cn("rounded-panel bg-surface-1 p-6 md:p-7", className)}
+			className={cn(
+				"h-fit rounded-panel bg-surface-1 p-6 md:p-7",
+				className,
+			)}
 		>
-			<header className="mb-5 flex items-center justify-between gap-3">
+			<header className="mb-5 flex flex-wrap items-center justify-between gap-3">
 				<div className="flex items-center gap-3.5">
 					<h2 className="text-2xl font-semibold md:text-3xl">
 						{title}

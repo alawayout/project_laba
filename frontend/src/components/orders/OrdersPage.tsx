@@ -51,7 +51,7 @@ export default function OrdersPage() {
 						className={cn(
 							"pt-6 pb-2",
 							view === "row"
-								? "flex flex-col gap-5 sm:flex-row sm:overflow-x-auto sm:overflow-y-visible"
+								? "flex flex-col gap-10 sm:flex-row sm:overflow-x-auto sm:overflow-y-visible"
 								: "grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3",
 						)}
 					>

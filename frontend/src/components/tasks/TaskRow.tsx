@@ -14,7 +14,7 @@ interface TaskRowProps {
 }
 
 /** Строка таймлайна: время · узел · цветная пилюля задачи. */
-export function TaskRow({ task, onToggle }: TaskRowProps) {
+export function TaskRow({ task, onToggle }: Readonly<TaskRowProps>) {
 	return (
 		<button
 			type="button"
@@ -45,7 +45,7 @@ export function TaskRow({ task, onToggle }: TaskRowProps) {
 
 			<span
 				className={cn(
-					"inline-block rounded-pill px-5 py-3 text-base font-medium",
+					"inline-block rounded-2xl md:rounded-pill px-5 py-3 text-base font-medium",
 					PILL_COLOR[task.color],
 				)}
 			>
