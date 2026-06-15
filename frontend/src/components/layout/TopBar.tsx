@@ -1,14 +1,13 @@
 "use client";
 
-import { SearchInput } from "@/components/ui";
 import { useToaster } from "@/hooks";
 import { DatePill } from "./DatePill";
 import { Logo } from "./Logo";
 import { NotificationBell } from "./NotificationBell";
 import { ProfileChip } from "./ProfileChip";
-import { useSearchQuery } from "@/hooks/useSearchQuery";
 import { currentUser } from "@/lib/mocks/user.mock";
 import { useEffect, useState } from "react";
+import { GlobalSearch } from "../search/GlobalSearch";
 
 export interface SearchControl {
 	value: string;
@@ -21,7 +20,6 @@ const DATE_FMT = new Intl.DateTimeFormat("ru-RU", {
 });
 
 export function TopBar() {
-	const { query, setQuery } = useSearchQuery();
 	const { notify } = useToaster();
 
 	const [dateLabel, setDateLabel] = useState("");
@@ -42,11 +40,7 @@ export function TopBar() {
 				</div>
 			</div>
 
-			<SearchInput
-				value={query}
-				onChange={setQuery}
-				className="md:flex-1"
-			/>
+			<GlobalSearch />
 
 			<div className="hidden items-center gap-5 md:flex">
 				<DatePill label={dateLabel} />
