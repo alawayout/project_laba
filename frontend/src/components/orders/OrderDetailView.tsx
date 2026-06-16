@@ -2,17 +2,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Home } from "lucide-react";
+import { ArrowLeft, Home, Pencil } from "lucide-react";
 import { AppShell } from "@/components/layout";
 import { Button, Field, Toggle } from "@/components/ui";
 import { useOrderDetail, useToaster } from "@/hooks";
-import type { Technician, WorkStage } from "@/lib/types";
+import type { Technician, WorkStage, OrderFormValues } from "@/lib/types";
 import { formatRub } from "@/lib/utils";
+import { orderDetailToForm } from "@/lib/order-form";
 import { OrderInfoPanel } from "./OrderInfoPanel";
 import { OrderPhotos } from "./OrderPhotos";
 import { OrderScheduleFields } from "./OrderScheduleFields";
 import { StageList } from "./StageList";
 import { ToothChart } from "./ToothChart";
+import { OrderFormModal } from "./order-form/OrderFormModal";
 import { FineModal } from "./modals/FineModal";
 import { ReplaceTechModal } from "./modals/ReplaceTechModal";
 import { ReportModal } from "./modals/ReportModal";
@@ -31,6 +33,7 @@ export function OrderDetailView({ orderId }: Readonly<OrderDetailViewProps>) {
 	const { notify } = useToaster();
 	const detail = useOrderDetail(orderId);
 	const [modal, setModal] = useState<ActiveModal>(null);
+	const [editDraft, setEditDraft] = useState<OrderFormValues | null>(null);
 	const { order } = detail;
 
 	const goBack = () => router.push("/");
@@ -92,6 +95,14 @@ export function OrderDetailView({ orderId }: Readonly<OrderDetailViewProps>) {
 					<h1 className="text-2xl font-semibold md:text-3xl">
 						Просмотр наряда №{order.number}
 					</h1>
+					<button
+						type="button"
+						onClick={() => setEditDraft(orderDetailToForm(order))}
+						aria-label="Редактировать наряд"
+						className="ml-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-pill bg-surface-3 transition hover:bg-surface-4 md:h-[52px] md:w-[52px] [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-6 md:[&>svg]:w-6"
+					>
+						<Pencil />
+					</button>
 				</div>
 
 				<OrderInfoPanel order={order} />
@@ -170,6 +181,14 @@ export function OrderDetailView({ orderId }: Readonly<OrderDetailViewProps>) {
 					workType={order.workType}
 					onClose={() => setModal(null)}
 					onConfirm={confirmFine}
+				/>
+			)}
+
+			{editDraft && (
+				<OrderFormModal
+					mode="edit"
+					initial={editDraft}
+					onClose={() => setEditDraft(null)}
 				/>
 			)}
 		</AppShell>

@@ -3,6 +3,8 @@ export { IconButton, type IconButtonTone } from "./IconButton";
 export { Badge, type BadgeSize } from "./Badge";
 export { Avatar } from "./Avatar";
 export { Field, type FieldTone } from "./Field";
+export { TextField, type TextFieldTone } from "./TextField";
+export { DashedButton } from "./DashedButton";
 export { Toggle } from "./Toggle";
 export { Select, type SelectOption } from "./Select";
 export { AmountInput } from "./AmountInput";

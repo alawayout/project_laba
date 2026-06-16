@@ -1,7 +1,9 @@
 import { cn } from "@/lib/utils";
 
 /** Подсказка-аффорданс «?» в лаймовом круге. */
-export function HelpHint({ className }: Readonly<{ className?: string }>) {
+export default function HelpHint({
+	className,
+}: Readonly<{ className?: string }>) {
 	return (
 		<span
 			className={cn(

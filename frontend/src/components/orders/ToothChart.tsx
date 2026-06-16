@@ -1,11 +1,22 @@
 import { cn } from "@/lib/utils";
+import type { ToothArch } from "@/lib/types";
 import { ToothShape } from "./ToothShape";
 
 interface ToothChartProps {
 	isSelected: (tooth: number) => boolean;
 	onToggle: (tooth: number) => void;
 	label: string;
+	/** Кнопки быстрого выбора челюсти (режим формы). */
+	onSelectArch?: (arch: ToothArch) => void;
+	/** Ссылка «Очистить» рядом с выбранными (режим формы). */
+	onClear?: () => void;
 }
+
+const ARCH_LABELS: { arch: ToothArch; label: string }[] = [
+	{ arch: "all", label: "Все зубы" },
+	{ arch: "upper", label: "Верхняя челюсть" },
+	{ arch: "lower", label: "Нижняя челюсть" },
+];
 
 const UPPER = Array.from({ length: 16 }, (_, i) => i + 1); // 1..16
 const LOWER = Array.from({ length: 16 }, (_, i) => 32 - i); // 32..17
@@ -175,6 +186,8 @@ export function ToothChart({
 	isSelected,
 	onToggle,
 	label,
+	onSelectArch,
+	onClear,
 }: Readonly<ToothChartProps>) {
 	return (
 		<div className="py-2">
@@ -210,9 +223,35 @@ export function ToothChart({
 				/>
 			</div>
 
-			<p className="mt-5 text-md font-medium text-fg-tertiary">
-				Выбрано: <span className="text-fg">{label}</span>
-			</p>
+			{onSelectArch && (
+				<div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+					{ARCH_LABELS.map(({ arch, label: archLabel }) => (
+						<button
+							key={arch}
+							type="button"
+							onClick={() => onSelectArch(arch)}
+							className="text-md font-medium text-fg-tertiary transition hover:text-fg"
+						>
+							{archLabel}
+						</button>
+					))}
+				</div>
+			)}
+
+			<div className="mt-5 flex items-center justify-between gap-3">
+				<p className="text-md font-medium text-fg-tertiary">
+					Выбрано: <span className="text-fg">{label}</span>
+				</p>
+				{onClear && (
+					<button
+						type="button"
+						onClick={onClear}
+						className="shrink-0 text-md font-medium text-accent transition hover:brightness-110"
+					>
+						Очистить
+					</button>
+				)}
+			</div>
 		</div>
 	);
 }

@@ -18,3 +18,11 @@ export type {
 } from "./payroll";
 export type { AnalyticsKpi, SeriesPoint, DistributionSlice } from "./analytics";
 export type { WorkTypeStage, WorkType } from "./work-type";
+export type {
+	OrderFormMode,
+	ToothArch,
+	OrderFormStage,
+	OrderFormFitting,
+	OrderFormPhoto,
+	OrderFormValues,
+} from "./order-form";
