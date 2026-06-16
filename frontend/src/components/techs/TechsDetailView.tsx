@@ -3,15 +3,15 @@
 import Link from "next/link";
 import { ChevronLeft, Home } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
-import { DOCTORS } from "@/lib/mocks/doctors";
 import { AppShell } from "../layout";
+import { TECHS } from "@/lib/mocks/techs";
 
-/** Заготовка экрана врача (переход из поиска). */
-export function DoctorDetailView({ doctorId }: Readonly<{ doctorId: string }>) {
-	const doctors = DOCTORS; // TODO: fetch doctor by ID
-	const doctor = doctors.find((d) => d.id === doctorId);
+/** Заготовка экрана техника (переход из поиска). */
+export function TechsDetailView({ techId }: Readonly<{ techId: string }>) {
+	const techs = TECHS; // TODO: fetch tech by ID
+	const tech = techs.find((t) => t.id === techId);
 
-	if (!doctor) {
+	if (!tech) {
 		return (
 			<div className="anim-view max-w-[1480px]">
 				<header className="my-3.5 flex items-center gap-5.5">
@@ -29,11 +29,11 @@ export function DoctorDetailView({ doctorId }: Readonly<{ doctorId: string }>) {
 					>
 						<ChevronLeft />
 					</Link>
-					<h1 className="text-3xl font-semibold">Врач</h1>
+					<h1 className="text-3xl font-semibold">Техник</h1>
 				</header>
 
 				<section className="rounded-panel bg-surface-3 p-5.5">
-					<p className="text-md text-fg-muted">Врач не найден.</p>
+					<p className="text-md text-fg-muted">Техник не найден.</p>
 				</section>
 			</div>
 		);
@@ -57,27 +57,23 @@ export function DoctorDetailView({ doctorId }: Readonly<{ doctorId: string }>) {
 					>
 						<ChevronLeft />
 					</Link>
-					<h1 className="text-3xl font-semibold">Врач</h1>
+					<h1 className="text-3xl font-semibold">Техник</h1>
 				</header>
 
 				<section className="rounded-panel bg-surface-3 p-5.5">
 					<div className="flex items-center gap-5">
-						<Avatar
-							src={doctor.avatar}
-							alt={doctor.name}
-							size={88}
-						/>
+						<Avatar src={tech.avatar} alt={tech.name} size={88} />
 						<div>
 							<div className="text-2xl font-semibold">
-								{doctor.name}
+								{tech.name}
 							</div>
 							<div className="mt-1 text-md text-fg-muted">
-								{doctor.clinic}
+								{tech.category}
 							</div>
 						</div>
 					</div>
 					<p className="mt-6 max-w-[640px] text-md text-fg-muted">
-						Раздел в разработке. Здесь появятся наряды врача и
+						Раздел в разработке. Здесь появятся наряды техника и
 						история заказов.
 					</p>
 				</section>

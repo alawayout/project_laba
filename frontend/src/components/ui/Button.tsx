@@ -7,6 +7,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	variant?: ButtonVariant;
 	block?: boolean;
 	leftIcon?: ReactNode;
+	size?: "sm" | "md" | "lg";
 }
 
 const VARIANTS: Record<ButtonVariant, string> = {
@@ -20,11 +21,12 @@ export function Button({
 	variant = "lime",
 	block = false,
 	leftIcon,
+	size = "md",
 	className,
 	children,
 	type = "button",
 	...rest
-}: ButtonProps) {
+}: Readonly<ButtonProps>) {
 	return (
 		<button
 			type={type}
@@ -33,6 +35,8 @@ export function Button({
 				"px-6 py-3.5 text-base font-semibold transition",
 				"active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none",
 				"md:text-lg md:px-7 md:py-4",
+				size === "sm" && "px-4 py-2 text-sm",
+				size === "lg" && "px-8 py-5 text-xl",
 				VARIANTS[variant],
 				block && "w-full",
 				className,

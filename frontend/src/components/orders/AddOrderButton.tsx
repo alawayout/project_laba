@@ -16,8 +16,9 @@ export function AddOrderButton({
 		<Button
 			variant="white"
 			onClick={onClick}
+			size="lg"
 			className={cn(
-				"inline-flex items-center gap-3.5 py-2 pl-2 pr-7",
+				"inline-flex items-center gap-2.5 py-2 pl-2 pr-7",
 				className,
 			)}
 		>
