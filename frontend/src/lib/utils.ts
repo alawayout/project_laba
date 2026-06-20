@@ -1,8 +1,8 @@
-/** Tiny conditional-classname joiner (no external dep). */
-export function cn(
-  ...parts: Array<string | false | null | undefined>
-): string {
-  return parts.filter(Boolean).join(" ");
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
 }
 
 /** Format an integer as RU currency, e.g. 5000 → "5 000". */

@@ -21,7 +21,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="ru" className={`${montserrat.variable} h-full antialiased`}>
+		<html lang="ru" className={`dark ${montserrat.variable} h-full antialiased`}>
 			<body className="min-h-full bg-bg text-fg font-sans">
 				<SearchProvider>
 					<ToasterProvider>{children}</ToasterProvider>
