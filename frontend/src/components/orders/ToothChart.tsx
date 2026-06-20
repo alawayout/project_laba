@@ -27,15 +27,15 @@ const MAX_ROT = 30; // degrees — max lean at molars
 const ARCH = Array.from({ length: 16 }, (_, i) => {
 	const t = i / 15; // 0 → 1
 	return {
-		xPct: 7 + 86 * t,                  // evenly spaced 7% … 93%
-		sinTheta: Math.sin(Math.PI * t),    // 0 at edges, 1 at center
-		rotDeg: -(t - 0.5) * 2 * MAX_ROT,  // +30° left, 0° center, −30° right
+		xPct: 7 + 86 * t,									 // evenly spaced 7% … 93%
+		sinTheta: Math.sin(Math.PI * t),		// 0 at edges, 1 at center
+		rotDeg: -(t - 0.5) * 2 * MAX_ROT,	 // +30° left, 0° center, −30° right
 	};
 });
 
 const ARCH_DEPTH = 80; // px — how much the arch curves from edge to center
-const TOOTH_H = 36;    // px — tooth SVG height
-const TOOTH_W = 18;    // px — tooth SVG width
+const TOOTH_H = 36;		 // px — tooth SVG height
+const TOOTH_W = 18;		 // px — tooth SVG width
 const SLOT_H = TOOTH_H + 4 + 12; // 52px — tooth + gap + label
 const CONTAINER_H = ARCH_DEPTH + SLOT_H; // 132px
 
@@ -105,7 +105,7 @@ function ArchDesktop({
 				const selected = isSelected(n);
 
 				// upper (flip=false): molars at y=0, front teeth at y=ARCH_DEPTH
-				// lower (flip=true):  front teeth at y=0, molars at y=ARCH_DEPTH
+				// lower (flip=true):	 front teeth at y=0, molars at y=ARCH_DEPTH
 				const top = flip
 					? ARCH_DEPTH * (1 - sinTheta)
 					: ARCH_DEPTH * sinTheta;

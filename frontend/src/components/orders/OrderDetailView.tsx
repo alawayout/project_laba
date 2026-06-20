@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Home, Pencil } from "lucide-react";
-import { AppShell } from "@/components/layout";
 import { Button, Field, Toggle } from "@/components/ui";
 import { useOrderDetail, useToaster } from "@/hooks";
 import type { Technician, WorkStage, OrderFormValues } from "@/lib/types";
@@ -40,14 +39,12 @@ export function OrderDetailView({ orderId }: Readonly<OrderDetailViewProps>) {
 
 	if (!order) {
 		return (
-			<AppShell>
-				<div className="py-24 text-center text-md text-fg-muted">
-					Наряд не найден.{" "}
-					<button onClick={goBack} className="text-accent underline">
-						На главную
-					</button>
-				</div>
-			</AppShell>
+			<div className="py-24 text-center text-md text-fg-muted">
+				Наряд не найден.{" "}
+				<button onClick={goBack} className="text-accent underline">
+					На главную
+				</button>
+			</div>
 		);
 	}
 
@@ -70,7 +67,7 @@ export function OrderDetailView({ orderId }: Readonly<OrderDetailViewProps>) {
 	};
 
 	return (
-		<AppShell>
+		<>
 			<section
 				style={{ animation: "labbor-view-in 0.32s ease" }}
 				className="mx-auto max-w-[1480px]"
@@ -191,6 +188,6 @@ export function OrderDetailView({ orderId }: Readonly<OrderDetailViewProps>) {
 					onClose={() => setEditDraft(null)}
 				/>
 			)}
-		</AppShell>
+		</>
 	);
 }

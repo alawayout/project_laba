@@ -3,6 +3,6 @@ export type SearchEntity = "orders" | "techs" | "doctors";
 
 /** Фрагмент текста для подсветки совпадения. */
 export interface HighlightPart {
-  text: string;
-  match: boolean;
+	text: string;
+	match: boolean;
 }

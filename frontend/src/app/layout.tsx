@@ -3,6 +3,7 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { ToasterProvider } from "@/hooks/useToaster";
 import { SearchProvider } from "@/hooks/useSearchQuery";
+import { AppShell } from "@/components/layout";
 
 const montserrat = Montserrat({
 	subsets: ["latin", "cyrillic"],
@@ -24,7 +25,9 @@ export default function RootLayout({
 		<html lang="ru" className={`dark ${montserrat.variable} h-full antialiased`}>
 			<body className="min-h-full bg-bg text-fg font-sans">
 				<SearchProvider>
-					<ToasterProvider>{children}</ToasterProvider>
+					<ToasterProvider>
+						<AppShell>{children}</AppShell>
+					</ToasterProvider>
 				</SearchProvider>
 			</body>
 		</html>
