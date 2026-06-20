@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { ToasterProvider } from "@/hooks/useToaster";
-import { AppShell } from "@/components/layout/AppShell";
-import { Search } from "lucide-react";
 import { SearchProvider } from "@/hooks/useSearchQuery";
 
 const montserrat = Montserrat({

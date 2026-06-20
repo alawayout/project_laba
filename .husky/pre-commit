@@ -1,0 +1,7 @@
+# 1. Lint (and auto-fix) staged files. --cwd runs the task inside the
+#    frontend workspace so ESLint (flat config) resolves eslint.config.mjs.
+npx lint-staged --cwd frontend
+
+# 2. Block the commit unless the production build succeeds.
+#    `next build` also type-checks the project.
+npm run build
