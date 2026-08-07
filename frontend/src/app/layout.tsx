@@ -3,7 +3,6 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { ToasterProvider } from "@/hooks/useToaster";
 import { SearchProvider } from "@/hooks/useSearchQuery";
-import { AppShell } from "@/components/layout";
 
 const montserrat = Montserrat({
 	subsets: ["latin", "cyrillic"],
@@ -16,6 +15,12 @@ export const metadata: Metadata = {
 	description: "SaaS CMS для зуботехнических лабораторий",
 };
 
+/**
+ * Корневой layout — только шрифты и глобальные провайдеры.
+ * Рейл/топбар (`AppShell`) живёт в `(dashboard)/layout.tsx`, чтобы
+ * public-страницы (`/setup`, `/invites/[token]/accept`) не получали
+ * внутреннюю навигацию приложения.
+ */
 export default function RootLayout({
 	children,
 }: Readonly<{
@@ -25,9 +30,7 @@ export default function RootLayout({
 		<html lang="ru" className={`dark ${montserrat.variable} h-full antialiased`}>
 			<body className="min-h-full bg-bg text-fg font-sans">
 				<SearchProvider>
-					<ToasterProvider>
-						<AppShell>{children}</AppShell>
-					</ToasterProvider>
+					<ToasterProvider>{children}</ToasterProvider>
 				</SearchProvider>
 			</body>
 		</html>

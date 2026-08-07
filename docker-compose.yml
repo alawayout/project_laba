@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: laba-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-laba}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-laba}
+      POSTGRES_DB: ${POSTGRES_DB:-laba}
+    ports:
+      - '5432:5432'
+    volumes:
+      - laba_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-laba}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend/laba-backend
+      dockerfile: Dockerfile
+    container_name: laba-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-laba}:${POSTGRES_PASSWORD:-laba}@postgres:5432/${POSTGRES_DB:-laba}?schema=public
+      PORT: 3000
+      NODE_ENV: production
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-access-secret-change-me}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-me}
+      JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-30}
+      INVITE_TTL_DAYS: ${INVITE_TTL_DAYS:-7}
+      APP_URL: ${APP_URL:-http://localhost:3001}
+    ports:
+      - '3000:3000'
+    command: sh -c "npx prisma migrate deploy && node dist/src/main"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000/api}
+    container_name: laba-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      PORT: 3001
+      # Серверный код Next (middleware/страницы) ходит в бэкенд по имени сервиса в docker-сети.
+      BACKEND_INTERNAL_URL: http://backend:3000/api
+      # Браузер пользователя ходит по адресу, опубликованному наружу.
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000/api}
+    ports:
+      - '3001:3001'
+
+volumes:
+  laba_postgres_data:

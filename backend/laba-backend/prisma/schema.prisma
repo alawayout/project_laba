@@ -1,0 +1,165 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  runtime      = "nodejs"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Роль пользователя в контексте конкретной лаборатории.
+enum LabRole {
+  OWNER
+  ADMIN
+  TECHNICIAN
+}
+
+/// Статус членства пользователя в лаборатории (позволяет владельцу
+/// заблокировать сотрудника без удаления его аккаунта).
+enum MembershipStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  EXPIRED
+  CANCELED
+}
+
+/// Пользователь платформы. Один и тот же аккаунт может состоять
+/// в нескольких лабораториях через LabMembership.
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+
+  /// Аккаунт платформенного администратора (создаёт лаборатории и владельцев).
+  isSuperAdmin Boolean @default(false)
+  /// Глобальная блокировка аккаунта (не зависит от лаборатории).
+  isActive     Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships LabMembership[]
+  sessions    Session[]
+  sentInvites Invite[]        @relation("InvitedBy")
+
+  @@map("users")
+}
+
+/// Зуботехническая лаборатория — единица тенанта (изоляции данных).
+model Lab {
+  id   String @id @default(uuid())
+  name String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships  LabMembership[]
+  invites      Invite[]
+  subscription Subscription?
+  sessions     Session[]
+
+  @@map("labs")
+}
+
+/// Связь пользователь-лаборатория с ролью. Один Owner может владеть
+/// несколькими лабами (несколько строк с role=OWNER для одного userId).
+model LabMembership {
+  id     String           @id @default(uuid())
+  userId String
+  labId  String
+  role   LabRole
+  status MembershipStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab  Lab  @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, labId])
+  @@index([labId])
+  @@map("lab_memberships")
+}
+
+/// Подписка привязана к конкретной лаборатории (не к владельцу).
+model Subscription {
+  id        String             @id @default(uuid())
+  labId     String             @unique
+  plan      String
+  status    SubscriptionStatus @default(TRIALING)
+  startsAt  DateTime           @default(now())
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lab Lab @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+/// Приглашение в лабораторию (в т.ч. первичное приглашение Owner'а,
+/// которое создаёт платформенный админ).
+model Invite {
+  id          String       @id @default(uuid())
+  email       String
+  labId       String
+  role        LabRole
+  token       String       @unique
+  status      InviteStatus @default(PENDING)
+  invitedById String?
+  expiresAt   DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lab       Lab   @relation(fields: [labId], references: [id], onDelete: Cascade)
+  invitedBy User? @relation("InvitedBy", fields: [invitedById], references: [id])
+
+  @@index([labId])
+  @@index([email])
+  @@map("invites")
+}
+
+/// Сессия refresh-токена. Хранение в БД даёт возможность точечно
+/// или массово отзывать доступ (логаут, блокировка, истечение подписки).
+model Session {
+  id               String    @id @default(uuid())
+  userId           String
+  /// Null для сессий платформенного администратора (не привязан к лабе).
+  labId            String?
+  refreshTokenHash String
+  userAgent        String?
+  ip               String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab  Lab? @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([labId])
+  @@map("sessions")
+}

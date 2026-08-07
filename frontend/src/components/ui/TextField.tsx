@@ -14,8 +14,11 @@ interface TextFieldProps {
 	trailing?: ReactNode;
 	multiline?: boolean;
 	inputMode?: "text" | "numeric";
+	/** HTML-тип для однострочного инпута (например, "password", "email"). */
+	type?: "text" | "email" | "password";
 	tone?: TextFieldTone;
 	className?: string;
+	autoComplete?: string;
 }
 
 const TONES: Record<TextFieldTone, string> = {
@@ -32,8 +35,10 @@ export function TextField({
 	trailing,
 	multiline = false,
 	inputMode = "text",
+	type = "text",
 	tone = "modal",
 	className,
+	autoComplete,
 }: TextFieldProps) {
 	return (
 		<label
@@ -56,7 +61,9 @@ export function TextField({
 				) : (
 					<input
 						value={value}
+						type={type}
 						inputMode={inputMode}
+						autoComplete={autoComplete}
 						onChange={(e) => onChange(e.target.value)}
 						placeholder={placeholder}
 						className="block w-full bg-transparent text-lg font-medium outline-none placeholder:text-fg-muted"
