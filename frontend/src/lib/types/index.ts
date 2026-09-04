@@ -1,5 +1,5 @@
 export type { ID, OrderStatus, DateTimeValue, Trend } from "./common";
-export type { Technician, UserRole, CurrentUser } from "./staff";
+export type { Technician } from "./staff";
 export type {
 	StageReport,
 	WorkStage,

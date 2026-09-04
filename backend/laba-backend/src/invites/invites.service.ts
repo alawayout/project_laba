@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -9,18 +10,11 @@ import { AuthService, TokenPair } from '../auth/auth.service';
 import type { AuthenticatedUser } from '../auth/interfaces/jwt-payload.interface';
 import { DatabaseService } from '../database/database.service';
 import { generateToken } from '../common/utils/token.util';
-import { LabRole } from '../../generated/prisma/client.js';
+import { canManageRole } from '../common/constants/lab-permissions';
 import { AcceptInviteDto } from './dto/accept-invite.dto';
 import { CreateInviteDto } from './dto/create-invite.dto';
 
 const ACTIVE_SUBSCRIPTION_STATUSES = ['ACTIVE', 'TRIALING'] as const;
-
-/** Кто кого имеет право приглашать. */
-const INVITE_PERMISSIONS: Record<LabRole, LabRole[]> = {
-  OWNER: ['ADMIN', 'TECHNICIAN'],
-  ADMIN: ['TECHNICIAN'],
-  TECHNICIAN: [],
-};
 
 @Injectable()
 export class InvitesService {
@@ -31,11 +25,34 @@ export class InvitesService {
   ) {}
 
   async createInvite(labId: string, dto: CreateInviteDto, inviter: AuthenticatedUser) {
-    if (!inviter.role || !INVITE_PERMISSIONS[inviter.role]?.includes(dto.role)) {
+    // Кто кого имеет право приглашать совпадает с тем, кто кем может управлять
+    // после приёма приглашения (см. EmployeesModule) — один источник правды.
+    if (!canManageRole(inviter.role, dto.role)) {
       throw new ForbiddenException('Недостаточно прав, чтобы пригласить эту роль');
     }
 
     await this.assertLabSubscriptionActive(labId);
+
+    // Уже действующего (не уволенного) сотрудника этой лабы приглашать заново
+    // некуда — это должно идти через изменение роли (EmployeesModule).
+    const existingUser = await this.db.user.findUnique({ where: { email: dto.email } });
+    if (existingUser) {
+      const existingMembership = await this.db.labMembership.findUnique({
+        where: { userId_labId: { userId: existingUser.id, labId } },
+      });
+      if (existingMembership && !existingMembership.deletedAt) {
+        throw new ConflictException('Этот email уже состоит в лаборатории');
+      }
+    }
+
+    // Не плодим дубликаты — на один email в лабе может быть только одно
+    // ещё не истёкшее активное приглашение одновременно.
+    const existingPendingInvite = await this.db.invite.findFirst({
+      where: { labId, email: dto.email, status: 'PENDING', expiresAt: { gt: new Date() } },
+    });
+    if (existingPendingInvite) {
+      throw new ConflictException('На этот email уже есть активное приглашение');
+    }
 
     const inviteTtlDays = Number(this.config.get('INVITE_TTL_DAYS') ?? 7);
     const invite = await this.db.invite.create({
@@ -118,14 +135,38 @@ export class InvitesService {
       });
     }
 
-    await this.db.labMembership.upsert({
+    // Существующее (в т.ч. мягко удалённое) членство — на случай повторного
+    // приглашения уволенного сотрудника: приём инвайта его восстанавливает.
+    const existingMembership = await this.db.labMembership.findUnique({
       where: { userId_labId: { userId: user.id, labId: invite.labId } },
-      update: { role: invite.role, status: 'ACTIVE' },
+    });
+
+    const membership = await this.db.labMembership.upsert({
+      where: { userId_labId: { userId: user.id, labId: invite.labId } },
+      update: {
+        role: invite.role,
+        status: 'ACTIVE',
+        deletedAt: null,
+        deletedById: null,
+      },
       create: {
         userId: user.id,
         labId: invite.labId,
         role: invite.role,
         status: 'ACTIVE',
+      },
+    });
+
+    await this.db.membershipEvent.create({
+      data: {
+        membershipId: membership.id,
+        labId: invite.labId,
+        targetUserId: user.id,
+        type: existingMembership?.deletedAt ? 'RESTORED' : 'CREATED',
+        actorId: invite.invitedById,
+        metadata: existingMembership?.deletedAt
+          ? { via: 'invite', previousRole: existingMembership.role }
+          : { role: invite.role, via: 'invite' },
       },
     });
 
@@ -139,6 +180,65 @@ export class InvitesService {
       { labId: invite.labId, role: invite.role },
       meta,
     );
+  }
+
+  /** Все приглашения лабы (для экрана «Сотрудники» — вкладка «Приглашения»). */
+  async listInvites(labId: string) {
+    const invites = await this.db.invite.findMany({
+      where: { labId },
+      include: {
+        invitedBy: { select: { id: true, firstName: true, lastName: true, email: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const appUrl = this.config.get<string>('APP_URL') ?? '';
+    const now = new Date();
+
+    return invites.map((invite) => {
+      // Статус в БД не обновляется фоново — на лету считаем «просроченным»
+      // PENDING, у которого уже прошёл expiresAt (реально помечается EXPIRED
+      // только при попытке accept/re-invite).
+      const effectiveStatus =
+        invite.status === 'PENDING' && invite.expiresAt < now ? 'EXPIRED' : invite.status;
+
+      return {
+        id: invite.id,
+        email: invite.email,
+        role: invite.role,
+        status: effectiveStatus,
+        expiresAt: invite.expiresAt,
+        createdAt: invite.createdAt,
+        invitedBy: invite.invitedBy
+          ? {
+              id: invite.invitedBy.id,
+              firstName: invite.invitedBy.firstName,
+              lastName: invite.invitedBy.lastName,
+              email: invite.invitedBy.email,
+            }
+          : null,
+        acceptUrl: effectiveStatus === 'PENDING' ? `${appUrl}/invites/${invite.token}/accept` : null,
+      };
+    });
+  }
+
+  /** Отзыв ещё не принятого приглашения — ссылка перестаёт работать. */
+  async revokeInvite(labId: string, inviteId: string, actor: AuthenticatedUser) {
+    const invite = await this.db.invite.findUnique({ where: { id: inviteId } });
+    if (!invite || invite.labId !== labId) {
+      throw new NotFoundException('Приглашение не найдено');
+    }
+    if (invite.status !== 'PENDING') {
+      throw new ConflictException('Отозвать можно только ещё не принятое приглашение');
+    }
+    if (!canManageRole(actor.role, invite.role)) {
+      throw new ForbiddenException('Недостаточно прав для отзыва этого приглашения');
+    }
+
+    return this.db.invite.update({
+      where: { id: inviteId },
+      data: { status: 'REVOKED' },
+    });
   }
 
   private async assertLabSubscriptionActive(labId: string): Promise<void> {

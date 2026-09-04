@@ -57,6 +57,7 @@ export class AuthService {
       where: {
         userId: user.id,
         status: 'ACTIVE',
+        deletedAt: null,
         ...(dto.labId ? { labId: dto.labId } : {}),
       },
       include: { lab: { include: { subscription: true } } },
@@ -140,7 +141,7 @@ export class AuthService {
           membership.lab.subscription.status as (typeof ACTIVE_SUBSCRIPTION_STATUSES)[number],
         );
 
-      if (!membership || membership.status !== 'ACTIVE' || !subActive) {
+      if (!membership || membership.status !== 'ACTIVE' || membership.deletedAt || !subActive) {
         await this.db.session.update({
           where: { id: sessionId },
           data: { revokedAt: new Date() },
@@ -184,7 +185,7 @@ export class AuthService {
         membership.lab.subscription.status as (typeof ACTIVE_SUBSCRIPTION_STATUSES)[number],
       );
 
-    if (!membership || membership.status !== 'ACTIVE' || !subActive) {
+    if (!membership || membership.status !== 'ACTIVE' || membership.deletedAt || !subActive) {
       throw new ForbiddenException(
         'Нет доступа к этой лаборатории или подписка неактивна',
       );

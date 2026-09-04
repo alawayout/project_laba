@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useToaster } from "@/hooks";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { NAV_ITEMS } from "./nav-items";
+import { NAV_ITEMS, isNavItemVisible } from "./nav-items";
 
 function NavTooltip({ label }: Readonly<{ label: string }>) {
 	return (
@@ -28,6 +29,8 @@ function NavTooltip({ label }: Readonly<{ label: string }>) {
 export function NavRail() {
 	const pathname = usePathname();
 	const { notify } = useToaster();
+	const { session } = useAuth();
+	const items = NAV_ITEMS.filter((item) => isNavItemVisible(item, session));
 
 	const buttonClass = (active: boolean) =>
 		cn(
@@ -52,7 +55,7 @@ export function NavRail() {
 				"md:static md:inset-auto md:bottom-auto md:h-auto md:w-[108px] md:flex-col md:justify-start md:gap-4 md:rounded-none md:border-0 md:border-r md:border-line md:bg-transparent md:px-0 md:py-9 md:shadow-none md:backdrop-blur-none",
 			)}
 		>
-			{NAV_ITEMS.map((item) => {
+			{items.map((item) => {
 				const active = isActive(item.href);
 				const Icon = item.icon;
 

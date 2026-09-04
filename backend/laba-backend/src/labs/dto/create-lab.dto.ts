@@ -5,8 +5,14 @@ export class CreateLabDto {
   @MinLength(2)
   labName!: string;
 
+  /**
+   * Не выведено в UI — "тариф" пока ни на что в бэке не влияет (доступ к
+   * лабе решают только status/expiresAt подписки, см. AuthService).
+   * Оставлено опциональным полем API на будущее; по умолчанию — DEFAULT_PLAN.
+   */
+  @IsOptional()
   @IsString()
-  plan!: string;
+  plan?: string;
 
   @IsOptional()
   @IsInt()

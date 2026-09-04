@@ -1,7 +1,8 @@
-# 1. Lint (and auto-fix) staged files. --cwd runs the task inside the
-#    frontend workspace so ESLint (flat config) resolves eslint.config.mjs.
+# Lint (and auto-fix) staged files. --cwd runs the task inside the
+# frontend workspace so ESLint (flat config) resolves eslint.config.mjs.
+#
+# Production build/type-check is intentionally NOT run here: the real
+# build happens in Docker (CI/deploy), and running `next build` locally
+# is slow and environment-dependent (native swc/lightningcss binaries,
+# network access to the npm registry, etc.).
 npx lint-staged --cwd frontend
-
-# 2. Block the commit unless the production build succeeds.
-#    `next build` also type-checks the project.
-npm run build

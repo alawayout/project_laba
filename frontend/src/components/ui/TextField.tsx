@@ -14,8 +14,8 @@ interface TextFieldProps {
 	trailing?: ReactNode;
 	multiline?: boolean;
 	inputMode?: "text" | "numeric";
-	/** HTML-тип для однострочного инпута (например, "password", "email"). */
-	type?: "text" | "email" | "password";
+	/** HTML-тип для однострочного инпута (например, "password", "email", "date"). */
+	type?: "text" | "email" | "password" | "date";
 	tone?: TextFieldTone;
 	className?: string;
 	autoComplete?: string;

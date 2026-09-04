@@ -9,6 +9,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { SuperAdminGuard } from './common/guards/super-admin.guard';
 import { DatabaseModule } from './database/database.module';
+import { EmployeesModule } from './employees/employees.module';
 import { InvitesModule } from './invites/invites.module';
 import { LabsModule } from './labs/labs.module';
 import { SetupModule } from './setup/setup.module';
@@ -22,6 +23,7 @@ import { UsersModule } from './users/users.module';
     DatabaseModule,
     AuthModule,
     LabsModule,
+    EmployeesModule,
     InvitesModule,
     SubscriptionsModule,
     UsersModule,

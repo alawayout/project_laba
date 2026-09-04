@@ -10,7 +10,7 @@ export class UsersService {
       where: { id: userId },
       include: {
         memberships: {
-          where: { status: 'ACTIVE' },
+          where: { status: 'ACTIVE', deletedAt: null },
           include: { lab: { include: { subscription: true } } },
         },
       },
