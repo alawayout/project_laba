@@ -4,7 +4,9 @@ import 'dotenv/config';
 import { defineConfig, env } from 'prisma/config';
 
 export default defineConfig({
-  schema: 'prisma/schema.prisma',
+  // Папка, а не файл: Prisma склеивает все .prisma внутри неё
+  // (schema.prisma + auth/tenancy/production/inventory).
+  schema: 'prisma',
   migrations: {
     path: 'prisma/migrations',
   },

@@ -1,0 +1,269 @@
+// Производство: пациенты и справочники, наряды, этапы-задачи
+// и фотографии работ.
+
+/// Общий статус наряда. Складывается из состояния этапов, но хранится
+/// явно — чтобы фильтровать списки без агрегации по задачам.
+enum OrderStatus {
+  NEW
+  IN_PROGRESS
+  DONE
+  CANCELED
+}
+
+/// Статус этапа наряда (задачи техника).
+/// Просрочка НЕ является статусом — она вычисляется как `dueAt < now()`
+/// при status != DONE, иначе пришлось бы обновлять строки по расписанию.
+enum TaskStatus {
+  /// Ждёт: предыдущий этап не завершён либо исполнитель не назначен.
+  QUEUED
+  IN_PROGRESS
+  /// Временно передано в клинику (примерка) — техник не работает.
+  AT_CLINIC
+  DONE
+  /// Заблокирован (например, кончился расходник).
+  BLOCKED
+}
+
+/// Тип события в истории задачи — аудит передачи работы между техниками.
+enum TaskEventType {
+  CREATED
+  ASSIGNED
+  /// Передача задачи другому технику.
+  REASSIGNED
+  STARTED
+  COMPLETED
+  /// Возврат на доработку после завершения.
+  REOPENED
+  BLOCKED
+  UNBLOCKED
+}
+
+/// Пациент существует в рамках одной лаборатории: если тот же человек
+/// придёт заказом через другую клинику в другую лабу — это будет отдельная
+/// запись, лабы не должны видеть пациентов друг друга.
+model Patient {
+  id       String @id @default(uuid())
+  labId    String
+  fullName String
+  /// Номер карты пациента в системе клиники-заказчика, если она его передаёт.
+  externalRef String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lab    Lab     @relation(fields: [labId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([labId])
+  @@map("patients")
+}
+
+/// Врач клиники-заказчика (внешний по отношению к лабе).
+model Doctor {
+  id         String  @id @default(uuid())
+  labId      String
+  fullName   String
+  clinicName String?
+  phone      String?
+  /// Скрытие вместо удаления — у врача остаются наряды в истории.
+  isArchived Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lab    Lab     @relation(fields: [labId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([labId])
+  @@map("doctors")
+}
+
+/// Вид работы («Ацеталовый бюгельный протез» и т.п.) — справочник лабы.
+model WorkType {
+  id         String  @id @default(uuid())
+  labId      String
+  name       String
+  isArchived Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lab            Lab             @relation(fields: [labId], references: [id], onDelete: Cascade)
+  stageTemplates StageTemplate[]
+  orders         Order[]
+
+  @@unique([labId, name])
+  @@index([labId])
+  @@map("work_types")
+}
+
+/// Шаблон этапа для вида работы. Из него генерируются Task при создании
+/// наряда: Гипсовка → Каркас → Грунт → Нанесение.
+model StageTemplate {
+  id         String @id @default(uuid())
+  workTypeId String
+  labId      String
+  stepIndex  Int
+  name       String
+  /// Нормативная длительность этапа в часах — для расчёта dueAt задачи.
+  slaHours   Int?
+
+  workType WorkType @relation(fields: [workTypeId], references: [id], onDelete: Cascade)
+  lab      Lab      @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@unique([workTypeId, stepIndex])
+  @@index([labId])
+  @@map("stage_templates")
+}
+
+/// Наряд — единица работы лаборатории по одному пациенту.
+model Order {
+  id         String @id @default(uuid())
+  labId      String
+  /// Человекочитаемый номер, уникален в пределах лабы.
+  number     String
+  patientId  String
+  doctorId   String?
+  workTypeId String
+
+  /// Оттенок реставрации, напр. "A-20, A-21".
+  shade    String?
+  /// Номера зубов.
+  teeth    Int[]
+  comment  String?
+  priority Boolean     @default(false)
+  dueAt    DateTime
+  status   OrderStatus @default(NEW)
+
+  /// Кто завёл наряд. SetNull при удалении аккаунта — наряд остаётся.
+  createdById String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lab       Lab      @relation(fields: [labId], references: [id], onDelete: Cascade)
+  patient   Patient  @relation(fields: [patientId], references: [id])
+  doctor    Doctor?  @relation(fields: [doctorId], references: [id])
+  workType  WorkType @relation(fields: [workTypeId], references: [id])
+  createdBy User?    @relation("OrderCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  fittings Fitting[]
+  tasks    Task[]
+  photos   Photo[]
+
+  @@unique([labId, number])
+  @@index([labId])
+  @@index([labId, status])
+  @@index([labId, dueAt])
+  @@map("orders")
+}
+
+/// Примерка у врача по наряду (их может быть несколько).
+model Fitting {
+  id          String    @id @default(uuid())
+  orderId     String
+  labId       String
+  scheduledAt DateTime
+  completedAt DateTime?
+  note        String?
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  lab   Lab   @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([labId, scheduledAt])
+  @@map("fittings")
+}
+
+/// Этап наряда = задача техника.
+///
+/// Передача задачи другому технику — это смена `assigneeId` ВМЕСТЕ с записью
+/// события REASSIGNED в TaskEvent (отдельный метод сервиса, не голый PATCH),
+/// по тому же принципу, что blockLab/restoreLab.
+model Task {
+  id        String     @id @default(uuid())
+  orderId   String
+  /// Денормализован для tenant-скоупинга и индексов «мои задачи в лабе».
+  labId     String
+  stepIndex Int
+  name      String
+  status    TaskStatus @default(QUEUED)
+
+  /// Текущий исполнитель. Членство в лабе проверяется в сервисе.
+  assigneeId String?
+
+  startedAt   DateTime?
+  completedAt DateTime?
+  /// Срок сдачи этапа (из StageTemplate.slaHours либо вручную).
+  dueAt       DateTime?
+  /// Комментарий техника при завершении этапа (отчёт).
+  reportComment String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order    Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  lab      Lab   @relation(fields: [labId], references: [id], onDelete: Cascade)
+  assignee User? @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  events         TaskEvent[]
+  consumableUses ConsumableUsageEvent[]
+
+  @@unique([orderId, stepIndex])
+  @@index([orderId])
+  @@index([labId, assigneeId])
+  @@index([labId, status])
+  @@map("tasks")
+}
+
+/// История задачи: кто/когда/кому передал, начал, завершил.
+model TaskEvent {
+  id      String        @id @default(uuid())
+  taskId  String
+  labId   String
+  type    TaskEventType
+  /// NULL — действие системы, а не конкретного человека.
+  actorId String?
+  /// Новый исполнитель — для ASSIGNED/REASSIGNED.
+  toUserId String?
+  /// Доп. контекст, напр. {"from":"<userId>","to":"<userId>"}.
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  task   Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  lab    Lab   @relation(fields: [labId], references: [id], onDelete: Cascade)
+  actor  User? @relation("TaskEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+  toUser User? @relation("TaskEventTarget", fields: [toUserId], references: [id], onDelete: SetNull)
+
+  @@index([taskId, createdAt])
+  @@index([labId])
+  @@map("task_events")
+}
+
+/// Фото работы/пациента по наряду. Сам файл лежит в объектном хранилище
+/// (MinIO / S3-совместимое), в БД — только метаданные и ключ объекта.
+/// Публичных ссылок нет: отдаём presigned URL с коротким TTL после проверки
+/// членства пользователя в лабе.
+model Photo {
+  id      String @id @default(uuid())
+  labId   String
+  orderId String
+  /// Кто загрузил. SetNull при удалении аккаунта — фото остаётся.
+  uploadedById String?
+
+  /// Ключ объекта в бакете: labs/{labId}/orders/{orderId}/{uuid}.jpg
+  storageKey String @unique
+  mimeType   String
+  sizeBytes  Int
+
+  createdAt DateTime @default(now())
+
+  lab        Lab   @relation(fields: [labId], references: [id], onDelete: Cascade)
+  order      Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  uploadedBy User? @relation("PhotoUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([labId])
+  @@map("photos")
+}

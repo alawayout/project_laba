@@ -1,0 +1,70 @@
+// Аккаунты платформы и сессии refresh-токенов.
+
+/// Пользователь платформы. Один и тот же аккаунт может состоять
+/// в нескольких лабораториях через LabMembership.
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+
+  /// Аккаунт платформенного администратора (создаёт лаборатории и владельцев).
+  isSuperAdmin Boolean @default(false)
+  /// Глобальная блокировка аккаунта (не зависит от лаборатории).
+  isActive     Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships LabMembership[]
+  sessions    Session[]
+  sentInvites Invite[]        @relation("InvitedBy")
+
+  /// Членства, которые этот пользователь мягко удалил (уволил).
+  deletedMemberships     LabMembership[]   @relation("MembershipDeletedBy")
+  /// События истории, где этот пользователь — субъект (чьё членство изменилось).
+  membershipEventsAsTarget MembershipEvent[] @relation("MembershipEventTarget")
+  /// События истории, которые этот пользователь инициировал.
+  membershipEventsAsActor  MembershipEvent[] @relation("MembershipEventActor")
+
+  // — производство и склад (см. секцию ниже) —
+  /// Наряды, которые этот пользователь завёл.
+  createdOrders           Order[]                @relation("OrderCreatedBy")
+  /// Задачи (этапы), где пользователь — текущий исполнитель.
+  assignedTasks           Task[]                 @relation("TaskAssignee")
+  taskEventsAsActor       TaskEvent[]            @relation("TaskEventActor")
+  /// События, где пользователь — тот, КОМУ передали задачу.
+  taskEventsAsTarget      TaskEvent[]            @relation("TaskEventTarget")
+  uploadedPhotos          Photo[]                @relation("PhotoUploadedBy")
+  createdConsumables      ConsumableItem[]       @relation("ConsumableCreatedBy")
+  archivedConsumables     ConsumableItem[]       @relation("ConsumableArchivedBy")
+  /// Списания расходников, сделанные этим техником.
+  consumableUsages        ConsumableUsageEvent[] @relation("ConsumableUsedBy")
+  consumableEventsAsActor ConsumableEvent[]      @relation("ConsumableEventActor")
+
+  @@map("users")
+}
+
+/// Сессия refresh-токена. Хранение в БД даёт возможность точечно
+/// или массово отзывать доступ (логаут, блокировка, истечение подписки).
+model Session {
+  id               String    @id @default(uuid())
+  userId           String
+  /// Null для сессий платформенного администратора (не привязан к лабе).
+  labId            String?
+  refreshTokenHash String
+  userAgent        String?
+  ip               String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab  Lab? @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([labId])
+  @@map("sessions")
+}

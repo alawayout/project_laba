@@ -12,7 +12,8 @@ export class UsersController {
 
   @ApiOperation({
     summary: 'Профиль текущего пользователя',
-    description: 'Данные аккаунта плюс список лаб, где у пользователя активное членство, с ролью и статусом подписки.',
+    description:
+      'Данные аккаунта плюс список лаб, где у пользователя активное членство, с ролью и статусом подписки.',
   })
   @Get('me')
   me(@CurrentUser() user: AuthenticatedUser) {

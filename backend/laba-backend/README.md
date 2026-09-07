@@ -21,8 +21,18 @@ API: `http://localhost:3000/api`. Swagger: `http://localhost:3000/docs`.
 
 ## Prisma
 
-- Схема: `prisma/schema.prisma`. Клиент генерируется в `generated/prisma`
-  (не в `node_modules` — Prisma 7, `prisma-client` generator).
+- Схема разбита по доменам внутри папки `prisma/` — Prisma склеивает все
+  `.prisma` в ней, связи между файлами работают без импортов:
+  - `schema.prisma` — только `generator` и `datasource`;
+  - `auth.prisma` — аккаунты и сессии;
+  - `tenancy.prisma` — лаборатории, членство, приглашения, подписки;
+  - `production.prisma` — пациенты, наряды, этапы-задачи, фото;
+  - `inventory.prisma` — склад расходников.
+
+  Путь задан в `prisma.config.ts` как `schema: 'prisma'` — именно папка, а не
+  файл: если указать один файл, Prisma молча прочитает только его.
+- Клиент генерируется в `generated/prisma` (не в `node_modules` — Prisma 7,
+  `prisma-client` generator).
 - `npx prisma generate` — перегенерировать клиент после правки схемы.
 - `npx prisma migrate dev --name <имя>` — новая миграция в dev-режиме.
 - `npx prisma migrate deploy` — применить существующие миграции (используется в
@@ -35,10 +45,10 @@ API: `http://localhost:3000/api`. Swagger: `http://localhost:3000/docs`.
 
 ```bash
 mkdir -p prisma/migrations/<timestamp>_<name>
-npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma \
+npx prisma migrate diff --from-empty --to-schema-datamodel prisma \
   --script > prisma/migrations/<timestamp>_<name>/migration.sql
 npx prisma db execute --file prisma/migrations/<timestamp>_<name>/migration.sql \
-  --schema prisma/schema.prisma
+  --schema prisma
 npx prisma migrate resolve --applied <timestamp>_<name>
 ```
 

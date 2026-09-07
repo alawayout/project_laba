@@ -1,0 +1,132 @@
+// Склад расходников: каталог, остатки и журналы списаний.
+
+/// Тип события по карточке расходника. Списания техниками сюда НЕ пишутся —
+/// у них отдельная таблица consumable_usage_events (их на порядки больше).
+enum ConsumableEventType {
+  CREATED
+  UPDATED
+  /// Скрытие из каталога.
+  ARCHIVED
+  RESTORED
+  /// Пополнение склада администратором.
+  RESTOCKED
+  /// Ручная корректировка остатка (инвентаризация).
+  ADJUSTED
+}
+
+/// Карточка расходника в каталоге лабы. Заводит и скрывает администратор.
+///
+/// `usesPerUnit` — на сколько применений в работе хватает одной «единицы»
+/// (той, которой оперирует админ при закупке: флакон, упаковка, блок).
+model ConsumableItem {
+  id    String @id @default(uuid())
+  labId String
+  name  String
+  /// Название единицы для витрины склада: "флакон", "упаковка", "блок".
+  unitLabel   String
+  usesPerUnit Int    @default(1)
+
+  /// Порог в ЕДИНИЦАХ, ниже которого показывать админу предупреждение.
+  lowStockThreshold Int?
+
+  /// Скрытие вместо удаления: расходник уже мог фигурировать в списаниях,
+  /// историю потребления терять нельзя (тот же принцип, что
+  /// LabMembership.deletedAt/deletedById).
+  isArchived   Boolean   @default(false)
+  archivedAt   DateTime?
+  archivedById String?
+
+  createdById String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lab        Lab   @relation(fields: [labId], references: [id], onDelete: Cascade)
+  createdBy  User? @relation("ConsumableCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  archivedBy User? @relation("ConsumableArchivedBy", fields: [archivedById], references: [id], onDelete: SetNull)
+
+  stock  ConsumableStock?
+  events ConsumableEvent[]
+  usages ConsumableUsageEvent[]
+
+  @@unique([labId, name])
+  @@index([labId])
+  @@index([labId, isArchived])
+  @@map("consumable_items")
+}
+
+/// Текущий остаток по расходнику. Вынесен из карточки намеренно: списание —
+/// частый конкурентный UPDATE, и он не должен пересекаться с редкими
+/// правками карточки (переименование, смена usesPerUnit).
+///
+/// `usesRemaining` — единственный источник правды, хранится в ПРИМЕНЕНИЯХ,
+/// а не в целых единицах: списание техником это -1 (или -N) от него,
+/// выполняемое одним атомарным UPDATE ... WHERE usesRemaining >= N.
+/// Остаток в целых единицах для витрины — производная величина,
+/// ceil(usesRemaining / usesPerUnit), считается на чтении.
+model ConsumableStock {
+  consumableItemId String @id
+  labId            String
+
+  usesRemaining Int @default(0)
+
+  updatedAt DateTime @updatedAt
+
+  consumableItem ConsumableItem @relation(fields: [consumableItemId], references: [id], onDelete: Cascade)
+  lab            Lab            @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@index([labId])
+  @@map("consumable_stock")
+}
+
+/// Списание расходника техником в рамках конкретной задачи.
+/// Пишется в одной транзакции с атомарным декрементом ConsumableStock.
+model ConsumableUsageEvent {
+  id               String  @id @default(uuid())
+  labId            String
+  consumableItemId String
+  /// В рамках какой задачи израсходован. SetNull, если задача удалена.
+  taskId           String?
+  /// Кто списал. SetNull при удалении аккаунта — история расхода остаётся.
+  usedById         String?
+
+  /// Сколько применений списано за раз.
+  quantityUses Int @default(1)
+  /// Снэпшот остатка сразу после списания — чтобы строить историю
+  /// без пересчёта всей цепочки событий.
+  usesRemainingAfter Int
+
+  createdAt DateTime @default(now())
+
+  lab            Lab            @relation(fields: [labId], references: [id], onDelete: Cascade)
+  consumableItem ConsumableItem @relation(fields: [consumableItemId], references: [id], onDelete: Cascade)
+  task           Task?          @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  usedBy         User?          @relation("ConsumableUsedBy", fields: [usedById], references: [id], onDelete: SetNull)
+
+  @@index([consumableItemId, createdAt])
+  @@index([labId, createdAt])
+  @@index([taskId])
+  @@map("consumable_usage_events")
+}
+
+/// Журнал по карточке расходника: создание, правка, скрытие/восстановление,
+/// пополнение склада, ручная корректировка остатка.
+model ConsumableEvent {
+  id               String              @id @default(uuid())
+  labId            String
+  consumableItemId String
+  type             ConsumableEventType
+  actorId          String?
+  /// {"unitsAdded":10} для RESTOCKED, {"from":40,"to":36} для ADJUSTED.
+  metadata         Json?
+
+  createdAt DateTime @default(now())
+
+  lab            Lab            @relation(fields: [labId], references: [id], onDelete: Cascade)
+  consumableItem ConsumableItem @relation(fields: [consumableItemId], references: [id], onDelete: Cascade)
+  actor          User?          @relation("ConsumableEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([consumableItemId, createdAt])
+  @@index([labId])
+  @@map("consumable_events")
+}

@@ -17,6 +17,48 @@ services:
       timeout: 5s
       retries: 10
 
+  # Объектное хранилище для фотографий пациентов. Бинарники не хранятся в
+  # Postgres: браузер заливает файл напрямую в MinIO по presigned PUT URL,
+  # бэкенд держит только метаданные (модель Photo) и ключ объекта.
+  minio:
+    image: minio/minio:latest
+    container_name: laba-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-labadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-labadmin123}
+    ports:
+      - '9000:9000' # S3 API
+      - '9001:9001' # веб-консоль
+    volumes:
+      - laba_minio_data:/data
+    healthcheck:
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Одноразовая инициализация: создаёт бакет и снимает с него анонимный
+  # доступ. Бакет всегда приватный — наружу отдаются только presigned-ссылки
+  # с коротким TTL, выдаваемые после проверки членства пользователя в лабе.
+  minio-init:
+    image: minio/mc:latest
+    container_name: laba-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-labadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-labadmin123}
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD &&
+      mc mb --ignore-existing local/${S3_BUCKET:-lab-photos} &&
+      mc anonymous set none local/${S3_BUCKET:-lab-photos} &&
+      echo 'MinIO bucket ready'
+      "
+
   backend:
     build:
       context: ./backend/laba-backend
@@ -25,6 +67,8 @@ services:
     restart: unless-stopped
     depends_on:
       postgres:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-laba}:${POSTGRES_PASSWORD:-laba}@postgres:5432/${POSTGRES_DB:-laba}?schema=public
@@ -36,6 +80,19 @@ services:
       JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-30}
       INVITE_TTL_DAYS: ${INVITE_TTL_DAYS:-7}
       APP_URL: ${APP_URL:-http://localhost:3001}
+      # Адрес MinIO внутри docker-сети — для серверных операций бэкенда.
+      S3_ENDPOINT: http://minio:9000
+      # ВАЖНО: presigned-ссылку нужно подписывать тем адресом, который видит
+      # БРАУЗЕР. Хост входит в подпись, поэтому ссылка, подписанная на
+      # http://minio:9000, у пользователя не откроется.
+      S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_ENDPOINT:-http://localhost:9000}
+      S3_BUCKET: ${S3_BUCKET:-lab-photos}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER:-labadmin}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-labadmin123}
+      # MinIO работает в path-style (bucket в пути, а не в поддомене).
+      S3_FORCE_PATH_STYLE: 'true'
+      S3_PRESIGN_TTL_SECONDS: ${S3_PRESIGN_TTL_SECONDS:-300}
     ports:
       - '3000:3000'
     command: sh -c "npx prisma migrate deploy && node dist/src/main"
@@ -61,3 +118,4 @@ services:
 
 volumes:
   laba_postgres_data:
+  laba_minio_data:

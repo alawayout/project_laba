@@ -1,0 +1,180 @@
+// Мультитенантность: лаборатории, членство сотрудников с ролями,
+// приглашения и подписки.
+
+/// Роль пользователя в контексте конкретной лаборатории.
+enum LabRole {
+  OWNER
+  ADMIN
+  TECHNICIAN
+}
+
+/// Статус членства пользователя в лаборатории (позволяет владельцу
+/// заблокировать сотрудника без удаления его аккаунта).
+enum MembershipStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  EXPIRED
+  CANCELED
+}
+
+/// Тип события в истории членства (аудит-лог сотрудника лабы).
+enum MembershipEventType {
+  /// Первое вступление в лабу (принятие приглашения) или повторное
+  /// вступление после того, как членство было создано с нуля.
+  CREATED
+  ROLE_CHANGED
+  BLOCKED
+  UNBLOCKED
+  /// Мягкое удаление (увольнение) — история и связи сохраняются.
+  REMOVED
+  /// Восстановление после мягкого удаления.
+  RESTORED
+}
+
+/// Зуботехническая лаборатория — единица тенанта (изоляции данных).
+model Lab {
+  id   String @id @default(uuid())
+  name String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships      LabMembership[]
+  invites          Invite[]
+  subscription     Subscription?
+  sessions         Session[]
+  membershipEvents MembershipEvent[]
+
+  // — производство и склад (см. секцию ниже) —
+  patients              Patient[]
+  doctors               Doctor[]
+  workTypes             WorkType[]
+  stageTemplates        StageTemplate[]
+  orders                Order[]
+  fittings              Fitting[]
+  tasks                 Task[]
+  taskEvents            TaskEvent[]
+  photos                Photo[]
+  consumableItems       ConsumableItem[]
+  consumableStocks      ConsumableStock[]
+  consumableUsageEvents ConsumableUsageEvent[]
+  consumableEvents      ConsumableEvent[]
+
+  @@map("labs")
+}
+
+/// Связь пользователь-лаборатория с ролью. Один Owner может владеть
+/// несколькими лабами (несколько строк с role=OWNER для одного userId).
+///
+/// Удаление сотрудника — мягкое: строка не стирается (`deletedAt` +
+/// `deletedById` фиксируют кто и когда уволил), чтобы сохранить историю
+/// (`MembershipEvent`) и связанные данные, с возможностью восстановления.
+model LabMembership {
+  id     String           @id @default(uuid())
+  userId String
+  labId  String
+  role   LabRole
+  status MembershipStatus @default(ACTIVE)
+
+  /// Отметка мягкого удаления (увольнения). NULL — сотрудник активен/заблокирован.
+  deletedAt   DateTime?
+  /// Кто уволил. SetNull при удалении аккаунта уволившего — история события
+  /// остаётся в MembershipEvent.
+  deletedById String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab       Lab   @relation(fields: [labId], references: [id], onDelete: Cascade)
+  deletedBy User? @relation("MembershipDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
+
+  events MembershipEvent[]
+
+  @@unique([userId, labId])
+  @@index([labId])
+  @@index([labId, deletedAt])
+  @@map("lab_memberships")
+}
+
+/// Запись истории членства: кто/когда/что сделал с сотрудником лабы
+/// (приглашение принято, роль изменена, блокировка, увольнение, восстановление).
+/// Переживает мягкое удаление и последующее восстановление — это и есть
+/// «история того, что происходило с техником».
+model MembershipEvent {
+  id           String              @id @default(uuid())
+  membershipId String
+  labId        String
+  targetUserId String
+  type         MembershipEventType
+  /// NULL — действие системы (напр. авто-логаут по истечении подписки),
+  /// а не конкретного человека.
+  actorId      String?
+  /// Доп. контекст события, напр. {"from":"ACTIVE","to":"BLOCKED"} или
+  /// {"reason":"..."} для увольнения.
+  metadata     Json?
+
+  createdAt DateTime @default(now())
+
+  membership LabMembership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  lab        Lab           @relation(fields: [labId], references: [id], onDelete: Cascade)
+  targetUser User          @relation("MembershipEventTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+  actor      User?         @relation("MembershipEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([membershipId, createdAt])
+  @@index([labId])
+  @@map("membership_events")
+}
+
+/// Подписка привязана к конкретной лаборатории (не к владельцу).
+model Subscription {
+  id        String             @id @default(uuid())
+  labId     String             @unique
+  plan      String
+  status    SubscriptionStatus @default(TRIALING)
+  startsAt  DateTime           @default(now())
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lab Lab @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+/// Приглашение в лабораторию (в т.ч. первичное приглашение Owner'а,
+/// которое создаёт платформенный админ).
+model Invite {
+  id          String       @id @default(uuid())
+  email       String
+  labId       String
+  role        LabRole
+  token       String       @unique
+  status      InviteStatus @default(PENDING)
+  invitedById String?
+  expiresAt   DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lab       Lab   @relation(fields: [labId], references: [id], onDelete: Cascade)
+  invitedBy User? @relation("InvitedBy", fields: [invitedById], references: [id])
+
+  @@index([labId])
+  @@index([email])
+  @@map("invites")
+}
